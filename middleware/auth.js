@@ -1,4 +1,4 @@
-const jwt = require("jwt");
+const jwt = require("jsonwebtoken");
 const CommonResponse = require("../utils/CommonResponse");
 const ResponseStatus = require("../utils/ResponseStatus");
 const auth = (req, res, next) => {
@@ -25,3 +25,5 @@ const auth = (req, res, next) => {
       );
   }
 };
+
+module.exports = auth;
