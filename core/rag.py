@@ -16,17 +16,23 @@ prompt = PromptTemplate(
 
 def answer_product_question(question: str) -> str:
     vectordb = get_vectorstore()
-    docs = vectordb.similarity_search(question, k=3)
 
-    if not docs:
+    results = vectordb.similarity_search_with_score(question, k=3)
+
+    if not results:
         return "I don't know"
 
-    context = "\n\n".join(d.page_content for d in docs)
+    best_doc, best_score = results[0]
+
+    if best_score > 0.7:
+        return "I don't know"
+
+    context = "\n\n".join(doc.page_content for doc, _ in results)
 
     chain = prompt | llm
-    result = chain.invoke({
+    response = chain.invoke({
         "context": context,
         "question": question
     })
 
-    return result.content.strip()
+    return response.content.strip()
