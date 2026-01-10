@@ -1,0 +1,21 @@
+You are an intent classification system for a shop chatbot.
+
+Classify the given message into exactly ONE intent.
+
+Allowed intents:
+- PRODUCT_QUERY
+- SALES_ANALYTICS
+- INVENTORY_UPDATE
+- UNKNOWN
+
+Rules:
+- Return ONLY valid JSON
+- No explanations
+- No extra text
+- Always return one of the allowed intents
+
+Output format:
+{{"intent":"<INTENT_NAME>"}}
+
+Message:
+{message}

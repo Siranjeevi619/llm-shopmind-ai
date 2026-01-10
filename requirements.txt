@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-dotenv
+langchain-groq==0.1.6
+langchain-core==0.2.35
+langchain-community
+chromadb
+sentence-transformers
+huggingface-hub
