@@ -1,43 +1,32 @@
 import os
-from dotenv import load_dotenv
-from langchain_groq import ChatGroq
-from langchain_core.prompts import PromptTemplate
-from pydantic import BaseModel
-from typing import Literal
-import json
+from langchain.prompts import PromptTemplate
+from core.llm import llm
 
-load_dotenv()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROMPT_PATH = os.path.join(BASE_DIR, "..", "prompts", "intent.txt")
 
-
-class IntentResponse(BaseModel):
-    intent: Literal[
-        "PRODUCT_QUERY",
-        "SALES_ANALYTICS",
-        "INVENTORY_UPDATE",
-        "UNKNOWN"
-    ]
-
-llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    temperature=0,
-    api_key=os.getenv("GROQ_API_KEY")
-)
-
-with open("prompts/intent.txt", "r", encoding="utf-8") as f:
-    template_text = f.read()
+with open(PROMPT_PATH, "r", encoding="utf-8") as f:
+    prompt_text = f.read()
 
 prompt = PromptTemplate(
-    template=template_text,
+    template=prompt_text,
     input_variables=["message"]
 )
 
+class IntentResult:
+    def __init__(self, intent: str):
+        self.intent = intent
 
-def classify_intent(message: str) -> IntentResponse:
+    def model_dump(self):
+        return {"intent": self.intent}
+
+def classify_intent(message: str) -> IntentResult:
     chain = prompt | llm
-    raw = chain.invoke({"message": message}).content
+    result = chain.invoke({"message": message})
 
-    try:
-        data = json.loads(raw)
-        return IntentResponse(**data)
-    except Exception:
-        return IntentResponse(intent="UNKNOWN")
+    intent = result.content.strip().upper()
+
+    if intent not in ["PRODUCT_QUERY", "ADMIN_COMMAND", "GENERAL_CHAT"]:
+        intent = "GENERAL_CHAT"
+
+    return IntentResult(intent)

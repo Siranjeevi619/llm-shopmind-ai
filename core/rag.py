@@ -1,18 +1,12 @@
 import os
-from dotenv import load_dotenv
-from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
+from core.llm import llm
 from rag.vectorstore import get_vectorstore
 
-load_dotenv()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROMPT_PATH = os.path.join(BASE_DIR, "..", "prompts", "product_rag.txt")
 
-llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    temperature=0.2,
-    api_key=os.getenv("GROQ_API_KEY")
-)
-
-with open("prompts/product_rag.txt", "r", encoding="utf-8") as f:
+with open(PROMPT_PATH, "r", encoding="utf-8") as f:
     prompt_text = f.read()
 
 prompt = PromptTemplate(
