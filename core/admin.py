@@ -1,11 +1,19 @@
 import os
+import json
+import re
+from dotenv import load_dotenv
+from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
-from core.llm import llm
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROMPT_PATH = os.path.join(BASE_DIR, "..", "prompts", "admin_action.txt")
+load_dotenv()
 
-with open(PROMPT_PATH, "r", encoding="utf-8") as f:
+llm = ChatGroq(
+    model="llama-3.1-8b-instant",
+    temperature=0,
+    api_key=os.getenv("GROQ_API_KEY")
+)
+
+with open("prompts/admin_action.txt", "r", encoding="utf-8") as f:
     prompt_text = f.read()
 
 prompt = PromptTemplate(
@@ -13,49 +21,31 @@ prompt = PromptTemplate(
     input_variables=["message"]
 )
 
-VALID_KEYS = {"action", "product", "quantity", "time_range"}
 
-def clean_value(value: str):
-    value = value.strip().strip(",")
+def _extract_json(text: str) -> dict:
+    """
+    Safely extract JSON from LLM output
+    """
+    try:
+        # Remove markdown if present
+        text = re.sub(r"```.*?```", "", text, flags=re.S).strip()
 
-    if value.lower() == "null":
-        return None
+        # Extract JSON object
+        match = re.search(r"\{.*\}", text, flags=re.S)
+        if not match:
+            raise ValueError("No JSON found")
 
-    # remove surrounding quotes
-    if value.startswith('"') and value.endswith('"'):
-        value = value[1:-1]
+        return json.loads(match.group())
+    except Exception:
+        return {
+            "action": "UNKNOWN",
+            "product": None,
+            "quantity": None,
+            "time_range": None
+        }
 
-    if value.isdigit():
-        return int(value)
-
-    return value
 
 def parse_admin_command(message: str) -> dict:
     chain = prompt | llm
     result = chain.invoke({"message": message})
-
-    raw = result.content.strip()
-    lines = raw.splitlines()
-
-    data = {
-        "action": "UNKNOWN",
-        "product": None,
-        "quantity": None,
-        "time_range": None
-    }
-
-    for line in lines:
-        if ":" not in line:
-            continue
-
-        key, value = line.split(":", 1)
-
-        key = key.strip().strip('"')
-        value = value.strip()
-
-        if key not in VALID_KEYS:
-            continue
-
-        data[key] = clean_value(value)
-
-    return data
+    return _extract_json(result.content)
