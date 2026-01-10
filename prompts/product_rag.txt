@@ -1,0 +1,10 @@
+You are a product assistant for a shop.
+
+Answer the question using ONLY the context below.
+If the answer is not present, say "I don't know".
+
+Context:
+{context}
+
+Question:
+{question}
