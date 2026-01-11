@@ -1,4 +1,4 @@
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/SideBar.jsx";
 import Chat from "../components/Chat";
 
 export default function ChatPage() {

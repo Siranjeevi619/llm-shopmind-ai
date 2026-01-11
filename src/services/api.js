@@ -1,13 +1,13 @@
 export async function sendMessage(message) {
-  const res = await fetch("http://localhost:3000/chat", {
+  const res = await fetch("http://127.0.0.1:8000/ai/chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
     body: JSON.stringify({ message }),
   });
 
   const data = await res.json();
-  return data.reply;
+
+  return data.reply || data.result || "No response";
 }
