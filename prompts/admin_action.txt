@@ -7,7 +7,7 @@ NO extra text.
 
 Schema (MUST FOLLOW EXACTLY):
 {{
-  "action": "INVENTORY_ADD | INVENTORY_SET | STOCK_QUERY | SALES_QUERY | UNKNOWN",
+  "action": "INVENTORY_ADD | INVENTORY_SET | STOCK_QUERY | SALES_QUERY | SALES_PREDICTION | UNKNOWN",
   "product": string | null,
   "quantity": number | null,
   "time_range": "today | week | month" | null
@@ -15,12 +15,15 @@ Schema (MUST FOLLOW EXACTLY):
 
 Rules:
 - Use quantity (NOT stock, NOT params)
+- If action is SALES_PREDICTION → predict revenue based on discount
 - If action is INVENTORY_ADD or INVENTORY_SET → quantity MUST be a number
 - If question is about availability → STOCK_QUERY
 - If question is about sales → SALES_QUERY
 - If not clear → UNKNOWN
 - Do NOT invent fields
 - Do NOT change field names
+
+
 
 Examples:
 
@@ -67,6 +70,22 @@ Output:
   "quantity": null,
   "time_range": "today"
 }}
+
+Admin message:
+{message}
+
+
+Admin message:
+If I give 10% discount on Samsung Galaxy S24, how much can I earn?
+
+Output:
+{{
+  "action": "SALES_PREDICTION",
+  "product": "Samsung Galaxy S24",
+  "quantity": 10,
+  "time_range": null
+}}
+
 
 Admin message:
 {message}

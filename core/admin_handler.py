@@ -1,6 +1,6 @@
 from db.mongo import inventory_collection, sales_collection
 from datetime import datetime, timedelta
-
+from core.sales_prediction import predict_sales
 def handle_admin_action(action: dict) -> str:
     action_type = action.get("action")
     product = action.get("product")
@@ -27,6 +27,11 @@ def handle_admin_action(action: dict) -> str:
         item = inventory_collection.find_one({"product": product})
         stock = item["stock"] if item else 0
         return f"Current stock for {product} is {stock}"
+    from core.sales_prediction import predict_sales
+
+    if action_type == "SALES_PREDICTION":
+        discount = action.get("quantity")
+        return predict_sales(product, discount)
 
     if action_type == "SALES_QUERY":
         query = {"product": product}
