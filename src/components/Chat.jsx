@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Message from "./Message";
 import { sendMessage, fetchMessages } from "../services/api";
 
 export default function Chat({ conversationId }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const bottomRef = useRef(null);
 
   useEffect(() => {
     if (!conversationId) {
@@ -13,6 +14,10 @@ export default function Chat({ conversationId }) {
     }
     fetchMessages(conversationId).then(setMessages);
   }, [conversationId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -28,22 +33,32 @@ export default function Chat({ conversationId }) {
 
   return (
     <div className="flex flex-col flex-1">
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.map((m, i) => (
-          <Message key={i} {...m} />
-        ))}
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
+        {messages.length === 0 ? (
+          <div className="text-center text-gray-400 mt-32">
+            <h2 className="text-xl mb-2">How can I help you today?</h2>
+            <p className="text-sm">Ask about products, stock, or orders</p>
+          </div>
+        ) : (
+          messages.map((m, i) => <Message key={i} {...m} />)
+        )}
+        <div ref={bottomRef} />
       </div>
 
-      <div className="border-t p-4 bg-[#40414f]">
-        <div className="flex gap-2">
+      {/* Input */}
+      <div className="border-t border-white/10 p-4 bg-[#343541]">
+        <div className="max-w-3xl mx-auto flex gap-2">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="flex-1 bg-[#343541] text-white px-4 py-2 rounded"
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            placeholder="Send a message..."
+            className="flex-1 bg-[#40414f] px-4 py-3 rounded text-sm outline-none"
           />
           <button
             onClick={handleSend}
-            className="bg-emerald-500 px-4 py-2 rounded"
+            className="px-4 py-3 rounded bg-white text-black text-sm"
           >
             Send
           </button>

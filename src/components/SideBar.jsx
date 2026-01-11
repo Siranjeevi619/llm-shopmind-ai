@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchConversations } from "../services/api";
 
-export default function Sidebar({ onSelect, onNewChat }) {
+export default function Sidebar({ onSelect, onNewChat, activeChat }) {
   const [chats, setChats] = useState([]);
 
   useEffect(() => {
@@ -9,23 +9,34 @@ export default function Sidebar({ onSelect, onNewChat }) {
   }, []);
 
   return (
-    <div className="w-64 bg-[#202123] p-4">
-      <h1 className="text-lg mb-4">ShopMind AI</h1>
+    <div className="w-72 bg-[#202123] border-r border-white/10 flex flex-col">
+      {/* Header */}
+      <div className="p-4 border-b border-white/10">
+        <button
+          onClick={onNewChat}
+          className="w-full py-2 text-sm rounded border border-white/20 hover:bg-white/10"
+        >
+          + New chat
+        </button>
+      </div>
 
-      <button className="border mb-4 px-2 py-1 w-full" onClick={onNewChat}>
-        + New Chat
-      </button>
-
-      <div className="space-y-2 text-sm">
+      {/* Conversations */}
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {chats.map((chat) => (
           <div
             key={chat._id}
             onClick={() => onSelect(chat._id)}
-            className="truncate text-gray-300 cursor-pointer hover:bg-[#2a2b32] p-1 rounded"
+            className={`px-3 py-2 rounded text-sm cursor-pointer truncate
+              ${activeChat === chat._id ? "bg-white/20" : "hover:bg-white/10"}`}
           >
-            {chat.title || "New Chat"}
+            {chat.title || "New conversation"}
           </div>
         ))}
+      </div>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-white/10 text-xs text-gray-400">
+        ShopMind AI
       </div>
     </div>
   );
