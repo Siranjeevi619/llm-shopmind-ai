@@ -16,6 +16,22 @@ const getConversations = async (req, res) => {
     );
 };
 
+const createConversation = async (req, res) => {
+  const { userId } = req.user;
+  const { title } = req.body;
+
+  const convo = await Conversation.create({
+    userId,
+    title: title || "New conversation",
+  });
+
+  return res
+    .status(201)
+    .json(
+      new CommonResponse("CONVERSATION CREATED", convo, ResponseStatus.ACCEPT)
+    );
+};
+
 const getMessages = async (req, res) => {
   const { userId } = req.user;
   const { id } = req.params;
@@ -36,4 +52,4 @@ const getMessages = async (req, res) => {
     .json(new CommonResponse("MESSAGES", messages, ResponseStatus.ACCEPT));
 };
 
-module.exports = { getConversations, getMessages };
+module.exports = { getConversations, getMessages, createConversation };

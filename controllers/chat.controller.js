@@ -4,11 +4,40 @@ const callPythonAI = require("../services/api");
 const CommonResponse = require("../utils/CommonResponse");
 const ResponseStatus = require("../utils/ResponseStatus");
 
+const extractAIText = (aiRes) => {
+  if (!aiRes || typeof aiRes !== "object") return "";
+
+  if (aiRes.reply) return aiRes.reply;
+  if (aiRes.result) return aiRes.result;
+  if (aiRes.message) return aiRes.message;
+  if (aiRes.summary) return aiRes.summary;
+
+  
+  return JSON.stringify(aiRes);
+};
+
 const chat = async (req, res) => {
   const { message, conversationId } = req.body;
   const { userId, role } = req.user;
 
+  if (!message || !message.trim()) {
+    return res
+      .status(400)
+      .json(new CommonResponse("EMPTY MESSAGE", null, ResponseStatus.REJECT));
+  }
+
   const aiRes = await callPythonAI({ role, message });
+  console.log("AI RESPONSE:", aiRes);
+
+  const aiText = extractAIText(aiRes);
+
+  if (!aiText) {
+    return res
+      .status(500)
+      .json(
+        new CommonResponse("AI RESPONSE INVALID", null, ResponseStatus.REJECT)
+      );
+  }
 
   let convo;
   if (conversationId) {
@@ -21,7 +50,7 @@ const chat = async (req, res) => {
 
   await Message.create([
     { conversationId: convo._id, role: "user", content: message },
-    { conversationId: convo._id, role: "assistant", content: aiRes.reply },
+    { conversationId: convo._id, role: "assistant", content: aiText },
   ]);
 
   convo.updatedAt = new Date();
@@ -32,7 +61,7 @@ const chat = async (req, res) => {
     .json(
       new CommonResponse(
         "AI RESPONSE",
-        { reply: aiRes.reply, conversationId: convo._id },
+        { reply: aiText, intent: aiRes.intent, conversationId: convo._id },
         ResponseStatus.ACCEPT
       )
     );
