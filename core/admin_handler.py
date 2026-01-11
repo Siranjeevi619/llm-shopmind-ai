@@ -1,29 +1,45 @@
-from db.mongo import inventory_collection
+from db.mongo import inventory_collection, sales_collection
+from datetime import datetime, timedelta
 
 def handle_admin_action(action: dict) -> str:
-    t = action["action"]
-    product = action["product"]
-    qty = action["quantity"]
+    action_type = action.get("action")
+    product = action.get("product")
+    quantity = action.get("quantity")
+    time_range = action.get("time_range")
 
-    if t == "INVENTORY_ADD":
+    if action_type == "INVENTORY_ADD":
         inventory_collection.update_one(
             {"product": product},
-            {"$inc": {"stock": qty}},
+            {"$inc": {"stock": quantity}},
             upsert=True
         )
-        return f"Added {qty} units to {product}"
+        return f"Added {quantity} units to {product}"
 
-    if t == "INVENTORY_SET":
+    if action_type == "INVENTORY_SET":
         inventory_collection.update_one(
             {"product": product},
-            {"$set": {"stock": qty}},
+            {"$set": {"stock": quantity}},
             upsert=True
         )
-        return f"Stock for {product} set to {qty}"
+        return f"Stock for {product} set to {quantity}"
 
-    if t == "STOCK_QUERY":
+    if action_type == "STOCK_QUERY":
         item = inventory_collection.find_one({"product": product})
         stock = item["stock"] if item else 0
         return f"Current stock for {product} is {stock}"
+
+    if action_type == "SALES_QUERY":
+        query = {"product": product}
+        now = datetime.utcnow()
+
+        if time_range == "today":
+            query["timestamp"] = {
+                "$gte": now.replace(hour=0, minute=0, second=0, microsecond=0)
+            }
+
+        sales = sales_collection.find(query)
+        total = sum(s.get("quantity", 0) for s in sales)
+
+        return f"Total sales for {product} is {total}"
 
     return "Unknown admin action"
