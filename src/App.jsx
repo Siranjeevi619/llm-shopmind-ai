@@ -7,13 +7,14 @@ const PrivateRoute = ({ children }) => {
   return localStorage.getItem("token") ? children : <Navigate to="/" />;
 };
 
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+
         <Route
           path="/chat"
           element={

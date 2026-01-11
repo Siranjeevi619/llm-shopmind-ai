@@ -40,3 +40,17 @@ export async function fetchMessages(conversationId) {
   const data = await res.json();
   return data.data;
 }
+
+export async function createConversation(title) {
+  const res = await fetch("http://localhost:3000/conversations", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify({ title }),
+  });
+
+  const data = await res.json();
+  return data.data;
+}
