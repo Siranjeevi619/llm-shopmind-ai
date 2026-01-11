@@ -1,13 +1,42 @@
-export async function sendMessage(message) {
-  const res = await fetch("http://127.0.0.1:8000/ai/chat", {
+export async function sendMessage(message, conversationId = null) {
+  const res = await fetch("http://localhost:3000/chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({
+      message,
+      conversationId,
+    }),
   });
 
   const data = await res.json();
 
-  return data.reply || data.result || "No response";
+  return data.data;
+}
+
+export async function fetchConversations() {
+  const res = await fetch("http://localhost:3000/conversations", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  const data = await res.json();
+  return data.data;
+}
+
+export async function fetchMessages(conversationId) {
+  const res = await fetch(
+    `http://localhost:3000/conversations/${conversationId}/messages`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+
+  const data = await res.json();
+  return data.data;
 }

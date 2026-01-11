@@ -1,17 +1,32 @@
-export default function Sidebar() {
-  const role = localStorage.getItem("role");
+import { useEffect, useState } from "react";
+import { fetchConversations } from "../services/api";
+
+export default function Sidebar({ onSelect, onNewChat }) {
+  const [chats, setChats] = useState([]);
+
+  useEffect(() => {
+    fetchConversations().then(setChats);
+  }, []);
 
   return (
-    <div className="w-64 bg-[#202123] p-4 flex flex-col">
-      <h1 className="text-lg font-semibold mb-2">ShopMind AI</h1>
+    <div className="w-64 bg-[#202123] p-4">
+      <h1 className="text-lg mb-4">ShopMind AI</h1>
 
-      {role === "ADMIN" && (
-        <span className="text-xs text-emerald-400 mb-4">● Admin Mode</span>
-      )}
-
-      <button className="border border-gray-600 rounded-md px-3 py-2 text-sm hover:bg-gray-700">
+      <button className="border mb-4 px-2 py-1 w-full" onClick={onNewChat}>
         + New Chat
       </button>
+
+      <div className="space-y-2 text-sm">
+        {chats.map((chat) => (
+          <div
+            key={chat._id}
+            onClick={() => onSelect(chat._id)}
+            className="truncate text-gray-300 cursor-pointer hover:bg-[#2a2b32] p-1 rounded"
+          >
+            {chat.title || "New Chat"}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
