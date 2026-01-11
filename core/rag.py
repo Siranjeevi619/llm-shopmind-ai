@@ -1,38 +1,30 @@
-from core.llm import llm
+from core.llm_client import llm
 from rag.vectorstore import get_vectorstore
 from langchain.prompts import PromptTemplate
-import os
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROMPT_PATH = os.path.join(BASE_DIR, "..", "prompts", "product_rag.txt")
-
-with open(PROMPT_PATH, "r", encoding="utf-8") as f:
-    prompt_text = f.read()
 
 prompt = PromptTemplate(
-    template=prompt_text,
+    template="""
+You are a shop assistant.
+Answer ONLY using the context.
+If the product is not mentioned, say it is not available in the shop.
+
+Context:
+{context}
+
+Question:
+{question}
+""",
     input_variables=["context", "question"]
 )
 
-def answer_product_question(question: str) -> str:
+def answer_product_question(question):
     vectordb = get_vectorstore()
+    docs = vectordb.similarity_search(question, k=3)
 
-    results = vectordb.similarity_search_with_score(question, k=3)
+    if not docs:
+        return None
 
-    if not results:
-        return "I don't know"
-
-    best_doc, best_score = results[0]
-
-    if best_score > 0.7:
-        return "I don't know"
-
-    context = "\n\n".join(doc.page_content for doc, _ in results)
-
-    chain = prompt | llm
-    response = chain.invoke({
-        "context": context,
-        "question": question
-    })
-
-    return response.content.strip()
+    context = "\n".join(d.page_content for d in docs)
+    return (prompt | llm).invoke(
+        {"context": context, "question": question}
+    ).content.strip()
