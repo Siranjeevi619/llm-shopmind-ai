@@ -1,13 +1,11 @@
-class SessionState:
+class SessionMemory:
     def __init__(self):
         self.last_product = None
-        self.last_intent = None
-        self.last_message = None
+        self.history = []
 
-    def reset(self):
-        self.last_product = None
-        self.last_intent = None
-        self.last_message = None
+    def add(self, user, assistant):
+        self.history.append({"user": user, "assistant": assistant})
+        if len(self.history) > 6:
+            self.history.pop(0)
 
-
-session = SessionState()
+session = SessionMemory()
