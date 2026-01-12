@@ -1,9 +1,8 @@
 fastapi
 uvicorn
-python-dotenv
 pymongo
+python-dotenv
+pydantic
 langchain
 langchain-groq
 langchain-community
-sentence-transformers
-chromadb
