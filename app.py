@@ -1,4 +1,3 @@
-import config
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import llm.intent_classifier as ic

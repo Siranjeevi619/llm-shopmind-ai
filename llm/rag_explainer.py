@@ -1,7 +1,8 @@
 import os, config
 from langchain_groq import ChatGroq
 from langchain.chains import RetrievalQA
-
+from dotenv import load_dotenv
+load_dotenv()
 def explain_product(retriever, query):
     llm = ChatGroq(
         api_key=os.getenv("GROQ_API_KEY"),

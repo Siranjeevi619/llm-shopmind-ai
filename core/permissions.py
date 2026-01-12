@@ -1,5 +1,3 @@
-ADMIN = "ADMIN"
-
 ADMIN_ONLY = {
     "ADD_PRODUCT",
     "ADD_STOCK",
@@ -8,5 +6,5 @@ ADMIN_ONLY = {
 }
 
 def check_permission(role: str, intent: str):
-    if intent in ADMIN_ONLY and role != ADMIN:
+    if intent in ADMIN_ONLY and role != "ADMIN":
         raise PermissionError("Unauthorized operation")

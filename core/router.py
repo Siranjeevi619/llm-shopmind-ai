@@ -3,8 +3,6 @@ from core.permissions import check_permission
 from core.validators import require
 from inventory.inventory_service import *
 from sales.sales_service import *
-from inventory.inventory_service import list_products
-
 
 def route(intent, payload, role):
     if intent == intents.UNKNOWN:
@@ -16,7 +14,12 @@ def route(intent, payload, role):
     if intent == intents.ADD_PRODUCT:
         check_permission(role, intent)
         require(payload, ["product_id", "name", "stock", "price"])
-        create_product(payload["product_id"], payload["name"], payload["stock"], payload["price"])
+        create_product(
+            payload["product_id"],
+            payload["name"],
+            payload["stock"],
+            payload["price"]
+        )
         return "Product added successfully."
 
     if intent == intents.ADD_STOCK:
@@ -30,20 +33,16 @@ def route(intent, payload, role):
         require(payload, ["product_id", "quantity"])
         set_stock(payload["product_id"], payload["quantity"])
         return "Stock set."
-    
+
     if intent == intents.LIST_PRODUCTS:
         products = list_products()
         if not products:
             return "No products are currently available."
 
-        lines = []
-        for p in products:
-            lines.append(
-                f"{p['_id']} | {p['name']} | Stock: {p['stock']} | Price: {p['price']}"
-            )
-
-        return "\n".join(lines)
-
+        return "\n".join(
+            f"{p['_id']} | {p['name']} | Stock: {p['stock']} | Price: {p['price']}"
+            for p in products
+        )
 
     if intent == intents.GET_STOCK:
         require(payload, ["product_id"])
@@ -63,5 +62,10 @@ def route(intent, payload, role):
     if intent == intents.SALES_PREDICTION:
         require(payload, ["product_id", "days"])
         return f"Predicted sales: {predict_sales(payload['product_id'], payload['days'])}"
+
+    if intent == intents.SALES_SUMMARY:
+        discount = float(payload.get("discount_percent", 0))
+        total = calculate_discounted_earnings(discount)
+        return f"Total possible earning after {discount}% discount is {total}"
 
     return "Unable to process request."

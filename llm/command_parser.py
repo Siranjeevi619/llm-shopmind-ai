@@ -1,8 +1,10 @@
 import os
 import json
-import config
 from langchain_groq import ChatGroq
 from core.sanitize import sanitize_keys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 llm = ChatGroq(
     api_key=os.getenv("GROQ_API_KEY"),
@@ -29,6 +31,7 @@ ADD_STOCK -> {{"product_id": "...", "quantity": number}}
 SET_STOCK -> {{"product_id": "...", "quantity": number}}
 GET_STOCK -> {{"product_id": "..."}}
 REMOVE_PRODUCT -> {{"product_id": "..."}}
+SALES_SUMMARY -> {{"discount_percent": number}}
 GENERAL_CHAT -> {{}}
 """
     res = llm.invoke(prompt)
