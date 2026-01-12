@@ -17,6 +17,7 @@ Classify intent strictly.
 Allowed:
 ADD_PRODUCT
 ADD_STOCK
+UPDATE_PRODUCT
 SET_STOCK
 GET_STOCK
 REMOVE_PRODUCT
@@ -28,13 +29,19 @@ SALES_SUMMARY
 GENERAL_CHAT
 UNKNOWN
 
-If the message asks to list, show, display, or view all products
-(e.g., "what are the products", "products in the database", "list products"),
-return LIST_PRODUCTS.
-
-If the message asks about total earning, profit, revenue, or income
-by selling all products (optionally with a discount),
-return SALES_SUMMARY.
+Rules:
+- If the message contains "update stock", "set stock", "change stock",
+  "modify stock", or "adjust stock", return SET_STOCK.
+- If the message asks about availability, quantity, or stock of a specific product
+  (e.g., "how many iphone15 are available"), return GET_STOCK.
+- If the message asks to list or show all products, return LIST_PRODUCTS.
+- If the message asks about total earning, profit, revenue, or income
+- If the message asks to update or change product price, stock, or both
+  (e.g., "update price", "change price", "update product"),
+  return UPDATE_PRODUCT.
+  by selling all products (optionally with a discount), return SALES_SUMMARY.
+- If the message is casual, opinion-based, or unrelated to shop operations,
+  return UNKNOWN.
 
 Message: {message}
 

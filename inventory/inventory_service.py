@@ -44,3 +44,24 @@ def list_products():
             {"_id": 1, "name": 1, "stock": 1, "price": 1}
         )
     )
+
+# ✅ THIS IS THE MISSING FUNCTION
+def update_product(pid, price=None, stock=None):
+    update = {}
+
+    if price is not None:
+        update["price"] = price
+
+    if stock is not None:
+        update["stock"] = stock
+
+    if not update:
+        raise ValueError("Nothing to update")
+
+    r = inventory_collection.update_one(
+        {"_id": pid, "active": True},
+        {"$set": update}
+    )
+
+    if r.matched_count == 0:
+        raise ValueError("Product not found")

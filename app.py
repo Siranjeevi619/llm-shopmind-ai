@@ -18,6 +18,9 @@ def chat(req: ChatRequest):
     try:
         intent = ic.classify_intent(req.message)
         payload = cp.parse_command(intent, req.message)
+
+        payload["_raw_message"] = req.message
+
         result = router.route(intent, payload, req.role)
         return ChatResponse(response=result)
     except Exception as e:

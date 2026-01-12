@@ -1,8 +1,21 @@
 import core.intents as intents
 from core.permissions import check_permission
 from core.validators import require
-from inventory.inventory_service import *
-from sales.sales_service import *
+from inventory.inventory_service import (
+    create_product,
+    add_stock,
+    set_stock,
+    get_stock,
+    remove_product,
+    list_products,
+    update_product
+)
+from sales.sales_service import (
+    total_sales,
+    predict_sales,
+    calculate_discounted_earnings
+)
+
 
 def route(intent, payload, role):
     if intent == intents.UNKNOWN:
@@ -22,23 +35,30 @@ def route(intent, payload, role):
         )
         return "Product added successfully."
 
-    if intent == intents.ADD_STOCK:
-        check_permission(role, intent)
-        require(payload, ["product_id", "quantity"])
-        add_stock(payload["product_id"], payload["quantity"])
-        return "Stock updated."
-
     if intent == intents.SET_STOCK:
         check_permission(role, intent)
         require(payload, ["product_id", "quantity"])
         set_stock(payload["product_id"], payload["quantity"])
         return "Stock set."
 
+    if intent == intents.UPDATE_PRODUCT:
+        check_permission(role, intent)
+        require(payload, ["product_id"])
+
+        if "price" not in payload and "quantity" not in payload:
+            raise ValueError("Provide price or quantity to update")
+
+        update_product(
+            payload["product_id"],
+            price=payload.get("price"),
+            stock=payload.get("quantity")
+        )
+        return "Product updated successfully."
+
     if intent == intents.LIST_PRODUCTS:
         products = list_products()
         if not products:
             return "No products are currently available."
-
         return "\n".join(
             f"{p['_id']} | {p['name']} | Stock: {p['stock']} | Price: {p['price']}"
             for p in products
@@ -54,14 +74,6 @@ def route(intent, payload, role):
         require(payload, ["product_id"])
         remove_product(payload["product_id"])
         return "Product removed."
-
-    if intent == intents.SALES_QUERY:
-        require(payload, ["product_id"])
-        return f"Total sales: {total_sales(payload['product_id'])}"
-
-    if intent == intents.SALES_PREDICTION:
-        require(payload, ["product_id", "days"])
-        return f"Predicted sales: {predict_sales(payload['product_id'], payload['days'])}"
 
     if intent == intents.SALES_SUMMARY:
         discount = float(payload.get("discount_percent", 0))
